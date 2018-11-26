@@ -89,10 +89,10 @@ namespace _31AI.AI
         }
     }
 
-    class MyPlayer : Player //Denna spelare fungerar exakt som MyPlayer. Ändra gärna i denna för att göra tester.
+    class test : Player //Denna spelare fungerar exakt som MyPlayer. Ändra gärna i denna för att göra tester.
     {
 
-        public MyPlayer()
+        public test()
         {
             Name = "MyPlayer";
         }
