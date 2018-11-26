@@ -8,6 +8,8 @@ namespace _31AI.AI
 {
     class MyPlayer : Player
     {
+        List<Card> OpponentCards = new List<Card>();
+
         public MyPlayer()
         {
             Name = "HackerMan";
@@ -16,6 +18,12 @@ namespace _31AI.AI
         //Called when the enemy knocks
         public override bool Knacka(int round)
         {
+            //Add the latest card picked up by the opponent if it's not null
+            if (OpponentsLatestCard != null)
+            {
+                OpponentCards.Add(OpponentsLatestCard);
+            }
+
             //If the round is less than or equal to 3
             if (round <= 3)
             {
@@ -85,7 +93,7 @@ namespace _31AI.AI
             else if (round >= 8)
             {
                 //If the score is 30 or above
-                if (Game.Score(this) >= 30) 
+                if (Game.Score(this) >= 30)
                 {
                     return true;
                 }
@@ -118,16 +126,18 @@ namespace _31AI.AI
         public override Card KastaKort()
         {
 
-            Game.Score(this);
+            //Get the worst card on the hand
             Card worstCard = Hand.First();
-            for (int i = 1; i < Hand.Count; i++)
+
+            for (int i = 0; i < Hand.Count; i++)
             {
-                if (Hand[i].Value < worstCard.Value)
+                if (true)
                 {
-                    worstCard = Hand[i];
+
                 }
             }
-            return worstCard;
+
+            return null;
         }
 
         //Called every time a game has ended
@@ -137,6 +147,9 @@ namespace _31AI.AI
             {
                 Wongames++;
             }
+
+            //Clears the list of cards that the opponent has picked up
+            OpponentCards.Clear();
         }
     }
 }
