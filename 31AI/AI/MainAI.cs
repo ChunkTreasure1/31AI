@@ -103,7 +103,7 @@ namespace _31AI.AI
         //Called when the AI takes up a card
         public override bool TaUppKort(Card card)
         {
-            if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
+            if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit) || card.Value == 10)
             {
                 return true;
             }
