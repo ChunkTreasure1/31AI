@@ -53,15 +53,18 @@ namespace _31AI.AI
 
         public override bool TaUppKort(Card card)
         {
-            if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
+            if (card != null)
             {
-                return true;
+                if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-            else
-            {
-                return false;
-            }
-
+            return false;
         }
 
         public override Card KastaKort()

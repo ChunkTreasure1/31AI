@@ -8,7 +8,6 @@ namespace _31AI.AI
 {
     class MyPlayer : Player
     {
-        List<Card> OpponentCards = new List<Card>();
 
         public MyPlayer()
         {
@@ -18,17 +17,11 @@ namespace _31AI.AI
         //Called when the enemy knocks
         public override bool Knacka(int round)
         {
-            //Add the latest card picked up by the opponent if it's not null
-            if (OpponentsLatestCard != null)
-            {
-                OpponentCards.Add(OpponentsLatestCard);
-            }
-
             //If the round is less than or equal to 3
             if (round <= 3)
             {
                 //If the game score is 25 or above
-                if (Game.Score(this) >= 25)
+                if (Game.Score(this) >= 20)
                 {
                     return true;
                 }
@@ -41,7 +34,7 @@ namespace _31AI.AI
             else if (round == 4)
             {
                 //If the game score is 26 or greater
-                if (Game.Score(this) >= 26)
+                if (Game.Score(this) >= 22)
                 {
                     return true;
                 }
@@ -54,7 +47,7 @@ namespace _31AI.AI
             else if (round == 5)
             {
                 //If the score is 27 or above
-                if (Game.Score(this) >= 27)
+                if (Game.Score(this) >= 24)
                 {
                     return true;
                 }
@@ -67,7 +60,7 @@ namespace _31AI.AI
             else if (round == 6)
             {
                 //If the score is 28 or above
-                if (Game.Score(this) >= 28)
+                if (Game.Score(this) >= 26)
                 {
                     return true;
                 }
@@ -80,7 +73,7 @@ namespace _31AI.AI
             else if (round == 7)
             {
                 //If the score is 29 or above
-                if (Game.Score(this) >= 29)
+                if (Game.Score(this) >= 28)
                 {
                     return true;
                 }
@@ -111,33 +104,82 @@ namespace _31AI.AI
         //Called when the AI takes up a card
         public override bool TaUppKort(Card card)
         {
-            if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
+            if (card != null)
             {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+                if (IsOneSuit())
+                {
+                    if (card.Suit == BestSuit)
+                    {
+                        int lowestValue = 11;
 
+                        for (int i = 0; i < Hand.Count; i++)
+                        {
+                            if (Hand[i].Value < lowestValue)
+                            {
+                                lowestValue = Hand[i].Value;
+                            }
+                        }
+
+                        if (card.Value > lowestValue)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (card.Value == 11)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         //Called when the AI should throw a cards
         public override Card KastaKort()
         {
-
-            //Get the worst card on the hand
-            Card worstCard = Hand.First();
-
-            for (int i = 0; i < Hand.Count; i++)
+            //If all the cards in the hand is the same suit
+            if (IsOneSuit())
             {
-                if (true)
+                Card lowestCard = null;
+                int lowestCardValue = 11;
+
+                //Go through the hand
+                for (int i = 0; i < Hand.Count; i++)
                 {
-
+                    //If the current cards value is less than the last lowest value
+                    if (Hand[i].Value < lowestCardValue)
+                    {
+                        //Set the values
+                        lowestCard = Hand[i];
+                        lowestCardValue = Hand[i].Value;
+                    }
                 }
-            }
 
-            return null;
+                //Return the worst card
+                return lowestCard;
+            }
+            else
+            {
+                Card throwawayCard = null;
+                int lowestCardValue = 11;
+
+                for (int i = 0; i < Hand.Count; i++)
+                {
+                    if (Hand[i].Suit != BestSuit && Hand[i].Value < lowestCardValue)
+                    {
+                        throwawayCard = Hand[i];
+                    }
+                }
+
+                return throwawayCard;
+            }
         }
 
         //Called every time a game has ended
@@ -147,9 +189,34 @@ namespace _31AI.AI
             {
                 Wongames++;
             }
+        }
 
-            //Clears the list of cards that the opponent has picked up
-            OpponentCards.Clear();
+        bool IsOneSuit()
+        {
+            Game.Score(this);
+
+            int numCards = 0;
+
+            //Go through all the cards
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                //If the suit if the current card is the best suit
+                if (Hand[i].Suit == BestSuit)
+                {
+                    //Increase the temp num
+                    numCards++;
+                }
+            }
+
+            //If the amount of cards is equal to the amount of cards that is of the best suit
+            if (numCards == Hand.Count)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
