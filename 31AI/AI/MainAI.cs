@@ -104,22 +104,30 @@ namespace _31AI.AI
         //Called when the AI takes up a card
         public override bool TaUppKort(Card card)
         {
+            //If the card isn't null
             if (card != null)
             {
+                //Check if the hand is one suit
                 if (IsOneSuit())
                 {
+                    //If the cards suit is the best suit
                     if (card.Suit == BestSuit)
                     {
+                        //Temp value
                         int lowestValue = 11;
 
+                        //Go through the hand
                         for (int i = 0; i < Hand.Count; i++)
                         {
+                            //If the hands lowest card is lower than the lowestValue
                             if (Hand[i].Value < lowestValue)
                             {
+                                //Change the lowestValue
                                 lowestValue = Hand[i].Value;
                             }
                         }
 
+                        //If the value is less than the lowest value
                         if (card.Value > lowestValue)
                         {
                             return true;
