@@ -183,15 +183,34 @@ namespace _31AI.AI
             }
             else
             {
+                //Temp values
                 Card throwawayCard = null;
                 int lowestCardValue = 11;
 
+                //Go through the hand
                 for (int i = 0; i < Hand.Count; i++)
                 {
+                    //If it's not the best suit and the value is less than the lowestCardValue
                     if (Hand[i].Suit != BestSuit && Hand[i].Value < lowestCardValue)
                     {
                         throwawayCard = Hand[i];
                     }
+                }
+
+                if (throwawayCard.Value == 11 || (throwawayCard.Value > 9 && throwawayCard.Suit == GetPropableOpponentCollectingSuit()))
+                {
+                    Card tempCard = throwawayCard;
+                    lowestCardValue = 11;
+
+                    for (int i = 0; i < Hand.Count; i++)
+                    {
+                        if (Hand[i].Suit != BestSuit && Hand[i].Value < lowestCardValue && Hand[i] != throwawayCard)
+                        {
+                            throwawayCard = Hand[i];
+                        }
+                    }
+
+                    return throwawayCard;
                 }
 
                 return throwawayCard;
@@ -210,6 +229,7 @@ namespace _31AI.AI
             OpponentCards.Clear();
         }
 
+        //Check if the player has full hand of one suit
         bool IsOneSuit()
         {
             Game.Score(this);
@@ -238,34 +258,58 @@ namespace _31AI.AI
             }
         }
 
+        //Gets the probable collecting suit of the opponent
         Suit GetPropableOpponentCollectingSuit()
         {
-            int numHeart = 0;
-            int numSpade = 0;
-            int numDiamond = 0;
-            int numClubs = 0;
+            //int array to hold the amounts
+            int[] amounts = new int[4];
 
+            //Go through all the cards that the opponent has taken from the throwaway pile
             for (int i = 0; i < OpponentCards.Count; i++)
             {
+                //Add to the correct amount
                 if (OpponentCards[i].Suit == Suit.Hjärter)
                 {
-                    numHeart++;
+                    amounts[0]++;
                 }
                 else if (OpponentCards[i].Suit == Suit.Klöver)
                 {
-                    numClubs++;
+                    amounts[1]++;
                 }
                 else if (OpponentCards[i].Suit == Suit.Ruter)
                 {
-                    numDiamond++;
+                    amounts[2]++;
                 }
                 else if (OpponentCards[i].Suit == Suit.Spader)
                 {
-                    numSpade++;
+                    amounts[3]++;
                 }
             }
 
-            return Suit.Hjärter;
+            //Get the index of the highest occuring number
+            int maxIndex = amounts.ToList().IndexOf(amounts.Max());
+
+            //Return the right suit based on the number
+            if (maxIndex == 0)
+            {
+                return Suit.Hjärter;
+            }
+            else if (maxIndex == 1)
+            {
+                return Suit.Klöver;
+            }
+            else if (maxIndex == 2)
+            {
+                return Suit.Ruter;
+            }
+            else if (maxIndex == 3)
+            {
+                return Suit.Spader;
+            }
+            else
+            {
+                return Suit.Hjärter;
+            }   
         }
     }
 
