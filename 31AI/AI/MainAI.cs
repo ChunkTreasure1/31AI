@@ -153,6 +153,41 @@ namespace _31AI.AI
                         }
                     }
                 }
+                else
+                {
+                    List<Card> cards = GetNonBestSuitCards();
+
+                    if (card.Suit == cards[0].Suit)
+                    {
+                        int cardSums = 0;
+
+                        for (int i = 0; i < cards.Count; i++)
+                        {
+                            cardSums += cards[i].Value;
+                        }
+
+                        cardSums += card.Value;
+
+                        int bestCardSum = 0;
+
+                        for (int i = 0; i < Hand.Count; i++)
+                        {
+                            if (Hand[i].Suit == BestSuit)
+                            {
+                                bestCardSum += Hand[i].Value;
+                            }
+                        }
+
+                        if (bestCardSum < cardSums)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
             }
             return false;
         }
@@ -161,7 +196,7 @@ namespace _31AI.AI
         public override Card KastaKort()
         {
             //If all the cards in the hand is the same suit
-            if (IsOneSuit())
+            if (IsOneSuit())                        
             {
                 Card lowestCard = null;
                 int lowestCardValue = 11;
@@ -177,7 +212,7 @@ namespace _31AI.AI
                         lowestCardValue = Hand[i].Value;
                     }
                 }
-
+                    
                 //Return the worst card
                 return lowestCard;
             }
@@ -185,7 +220,7 @@ namespace _31AI.AI
             {
                 //Temp values
                 Card throwawayCard = null;
-                int lowestCardValue = 11;
+                int lowestCardValue = 12;
 
                 //Go through the hand
                 for (int i = 0; i < Hand.Count; i++)
@@ -197,21 +232,21 @@ namespace _31AI.AI
                     }
                 }
 
-                if (throwawayCard.Value == 11 || (throwawayCard.Value > 9 && throwawayCard.Suit == GetPropableOpponentCollectingSuit()))
-                {
-                    Card tempCard = throwawayCard;
-                    lowestCardValue = 11;
+                //if (throwawayCard.Value == 11 || (throwawayCard.Value > 9 && throwawayCard.Suit == GetPropableOpponentCollectingSuit()))
+                //{
+                //    Card tempCard = throwawayCard;
+                //    lowestCardValue = 11;
 
-                    for (int i = 0; i < Hand.Count; i++)
-                    {
-                        if (Hand[i].Suit != BestSuit && Hand[i].Value < lowestCardValue && Hand[i] != throwawayCard)
-                        {
-                            throwawayCard = Hand[i];
-                        }
-                    }
+                //    for (int i = 0; i < Hand.Count; i++)
+                //    {
+                //        if (Hand[i].Suit != BestSuit && Hand[i].Value < lowestCardValue && Hand[i] != throwawayCard)
+                //        {
+                //            throwawayCard = Hand[i];
+                //        }
+                //    }
 
-                    return throwawayCard;
-                }
+                //    return throwawayCard;
+                //}
 
                 return throwawayCard;
             }
@@ -230,7 +265,7 @@ namespace _31AI.AI
         }
 
         //Check if the player has full hand of one suit
-        bool IsOneSuit()
+        private bool IsOneSuit()
         {
             Game.Score(this);
 
@@ -258,8 +293,89 @@ namespace _31AI.AI
             }
         }
 
+        //Gets the cards of highets value except the best suit
+        private List<Card> GetNonBestSuitCards()
+        {
+            //Temp list to hold non-best suit cards
+            List<Card> cards = new List<Card>();
+
+            //Find all the cards that is not the best suit and add them to the list
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                if (Hand[i].Suit != BestSuit)
+                {
+                    cards.Add(Hand[i]);
+                }
+            }
+
+            //Temp int array to get best cards
+            int[] sums = new int[4];
+
+            //Go through the cards and and the values together per suit
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i].Suit == Suit.Hjärter)
+                {
+                    sums[0] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Klöver)
+                {
+                    sums[1] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Ruter)
+                {
+                    sums[2] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Spader)
+                {
+                    sums[3] += cards[i].Value;
+                }
+            }
+
+            //Get the cards with highest points
+            int maxIndex = sums.ToList().IndexOf(sums.Max());
+
+            Suit bestSuit;
+
+            //Get the best suit
+            if (maxIndex == 0)
+            {
+                bestSuit = Suit.Hjärter;
+            }
+            else if (maxIndex == 1)
+            {
+                bestSuit = Suit.Klöver;
+            }
+            else if (maxIndex == 2)
+            {
+                bestSuit = Suit.Ruter;
+            }
+            else if (maxIndex == 3)
+            {
+                bestSuit = Suit.Spader;
+            }
+            else
+            {
+                bestSuit = Suit.Hjärter;
+            }
+
+            //List of return cards
+            List<Card> returnCards = new List<Card>();
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i].Suit == bestSuit)
+                {
+                    returnCards.Add(cards[i]);
+                }
+            }
+
+            return returnCards;
+
+        }
+
         //Gets the probable collecting suit of the opponent
-        Suit GetPropableOpponentCollectingSuit()
+        private Suit GetPropableOpponentCollectingSuit()
         {
             //int array to hold the amounts
             int[] amounts = new int[4];
@@ -319,7 +435,7 @@ namespace _31AI.AI
 
         public TestAI()
         {
-            Name = "HackerMan";
+            Name = "Test";
         }
 
         //Called when the enemy knocks
