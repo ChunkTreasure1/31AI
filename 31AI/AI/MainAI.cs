@@ -9,6 +9,7 @@ namespace _31AI.AI
     class MyPlayer : Player
     {
         List<Card> OpponentCards = new List<Card>();
+        List<int> OpponentKnockingScore = new List<int>();
 
         public MyPlayer()
         {
@@ -230,12 +231,17 @@ namespace _31AI.AI
                 Wongames++;
             }
 
+            if (lastTurn)
+            {
+                OpponentKnockingScore.Add(OpponentLatestScore);
+            }
+
             //Clear the collecting cache
             OpponentCards.Clear();
         }
 
         //Check if the player has full hand of one suit
-        bool IsOneSuit()
+        private bool IsOneSuit()
         {
             Game.Score(this);
 
@@ -263,6 +269,7 @@ namespace _31AI.AI
             }
         }
 
+        //Get a list of the cards of the suit that isn't best
         private List<Card> GetNonBestSuitCards()
         {
             List<Card> cards = new List<Card>();
@@ -333,6 +340,16 @@ namespace _31AI.AI
             }
 
             return returnCards;
+        }
+
+        //Gets the average of the opponents knocking score
+        private int GetOpponentKnockingAverage()
+        {
+            //Get the sum and the average
+            int sum = OpponentKnockingScore.Sum();
+            int average = sum / OpponentKnockingScore.Count;
+
+            return average;
         }
 
         //Gets the probable collecting suit of the opponent
