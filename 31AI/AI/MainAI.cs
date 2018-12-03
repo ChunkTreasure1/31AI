@@ -196,23 +196,6 @@ namespace _31AI.AI
                         throwawayCard = Hand[i];
                     }
                 }
-
-                if (throwawayCard.Value == 11 || (throwawayCard.Value > 9 && throwawayCard.Suit == GetPropableOpponentCollectingSuit()))
-                {
-                    Card tempCard = throwawayCard;
-                    lowestCardValue = 11;
-
-                    for (int i = 0; i < Hand.Count; i++)
-                    {
-                        if (Hand[i].Suit != BestSuit && Hand[i].Value < lowestCardValue && Hand[i] != throwawayCard)
-                        {
-                            throwawayCard = Hand[i];
-                        }
-                    }
-
-                    return throwawayCard;
-                }
-
                 return throwawayCard;
             }
         }
@@ -319,7 +302,7 @@ namespace _31AI.AI
 
         public TestAI()
         {
-            Name = "HackerMan";
+            Name = "TestMan";
         }
 
         //Called when the enemy knocks
