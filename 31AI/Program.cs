@@ -24,6 +24,8 @@ namespace _31AI
             players.Add(new BasicPlayer());
             players.Add(new MyPlayer());
             players.Add(new TestAI());
+            players.Add(new OtherAI());
+
             Console.WriteLine("Vilka två spelare skall mötas?");
             for (int i = 1; i <= players.Count; i++)
             {

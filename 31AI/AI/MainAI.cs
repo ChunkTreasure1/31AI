@@ -19,6 +19,8 @@ namespace _31AI.AI
         //Called when the enemy knocks
         public override bool Knacka(int round)
         {
+            int maxKnockScore = GetOpponentKnockingAverage();
+
             //If the opponent didn't pick up a card from the pile
             if (OpponentsLatestCard != null)
             {
@@ -26,83 +28,9 @@ namespace _31AI.AI
                 OpponentCards.Add(OpponentsLatestCard);
             }
 
-            //If the round is less than or equal to 3
-            if (round <= 3)
+            if (Game.Score(this) >= maxKnockScore + 1)
             {
-                //If the game score is 25 or above
-                if (Game.Score(this) >= 20)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            //If the round is equal to 4
-            else if (round == 4)
-            {
-                //If the game score is 26 or greater
-                if (Game.Score(this) >= 22)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            //If the round is 5
-            else if (round == 5)
-            {
-                //If the score is 27 or above
-                if (Game.Score(this) >= 24)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            //If the round is 6
-            else if (round == 6)
-            {
-                //If the score is 28 or above
-                if (Game.Score(this) >= 26)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            //If the round is 7
-            else if (round == 7)
-            {
-                //If the score is 29 or above
-                if (Game.Score(this) >= 28)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            //If the round is 8 or above
-            else if (round >= 8)
-            {
-                //If the score is 30 or above
-                if (Game.Score(this) >= 30)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
             else
             {
@@ -207,7 +135,7 @@ namespace _31AI.AI
             {
                 //Temp values
                 Card throwawayCard = null;
-                int lowestCardValue = 11;
+                int lowestCardValue = 12;
 
                 //Go through the hand
                 for (int i = 0; i < Hand.Count; i++)
@@ -215,10 +143,15 @@ namespace _31AI.AI
                     //If it's not the best suit and the value is less than the lowestCardValue
                     if (Hand[i].Suit != BestSuit && Hand[i].Value < lowestCardValue)
                     {
+                        lowestCardValue = Hand[i].Value;
                         throwawayCard = Hand[i];
                     }
                 }
 
+                if (throwawayCard == null)
+                {
+                    Console.Write("t");
+                }
                 return throwawayCard;
             }
         }
@@ -347,7 +280,18 @@ namespace _31AI.AI
         {
             //Get the sum and the average
             int sum = OpponentKnockingScore.Sum();
-            int average = sum / OpponentKnockingScore.Count;
+            int average = 0;
+
+            if (OpponentKnockingScore.Count != 0)
+            {
+                average = sum / OpponentKnockingScore.Count;
+
+                
+            }
+            else
+            {
+                average = 20;
+            }
 
             return average;
         }
@@ -667,6 +611,101 @@ namespace _31AI.AI
             }
 
             return Suit.Hjärter;
+        }
+    }
+
+    class OtherAI : Player
+    {
+        List<int> OpponentKnockingScore = new List<int>();
+
+        public OtherAI()
+        {
+            Name = "OtherAI";
+        }
+
+        public override bool Knacka(int round)
+        {
+            if (Game.Score(this) >= 20)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override bool TaUppKort(Card card)
+        {
+            if (card.Suit == BestSuit)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override Card KastaKort()
+        {
+            Card throwaway = null;
+
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                if (Hand[i].Suit != BestSuit)
+                {
+                    throwaway = Hand[i];
+                }
+            }
+
+            if (throwaway == null)
+            {
+                int lowestValue = 12;
+
+                for (int i = 0; i < Hand.Count; i++)
+                {
+                    if (Hand[i].Value < lowestValue)
+                    {
+                        lowestValue = Hand[i].Value;
+                        throwaway = Hand[i];
+                    }
+                }
+            }
+            return throwaway;
+        }
+
+        public override void SpelSlut(bool wonTheGame)
+        {
+            if (wonTheGame)
+            {
+                Wongames++;
+            }
+
+            if (lastTurn)
+            {
+                OpponentKnockingScore.Add(OpponentLatestScore);
+            }
+        }
+
+        private int GetOpponentKnockingAverage()
+        {
+            //Get the sum and the average
+            int sum = OpponentKnockingScore.Sum();
+            int average = 0;
+
+            if (OpponentKnockingScore.Count != 0)
+            {
+                average = sum / OpponentKnockingScore.Count;
+
+
+            }
+            else
+            {
+                average = 20;
+            }
+
+            return average;
         }
     }
 }
