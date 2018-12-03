@@ -22,6 +22,8 @@ namespace _31AI.AI
         public int StoppedGames;
         public int StoppedRounds;
         public int PrintPosition;
+        public Card UpCard; //Det kort som ligger över på skräphögen
+        public int OpponentLatestScore;  //Motståndarens senaste slutpoäng
         public bool lastTurn; // True om motståndaren har knackat, annars false.
         public Card OpponentsLatestCard; // Det senaste kortet motståndaren tog. Null om kortet drogs från högen.
 
@@ -53,18 +55,15 @@ namespace _31AI.AI
 
         public override bool TaUppKort(Card card)
         {
-            if (card != null)
+            if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
             {
-                if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
-            return false;
+            else
+            {
+                return false;
+            }
+
         }
 
         public override Card KastaKort()
@@ -137,8 +136,9 @@ namespace _31AI.AI
                 }
             }
             return worstCard;
-
         }
+
+
 
         public override void SpelSlut(bool wonTheGame)
         {

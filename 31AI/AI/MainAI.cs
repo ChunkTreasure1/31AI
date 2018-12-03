@@ -153,6 +153,10 @@ namespace _31AI.AI
                         }
                     }
                 }
+                else
+                {
+                    
+                }
             }
             return false;
         }
@@ -239,6 +243,78 @@ namespace _31AI.AI
             {
                 return false;
             }
+        }
+
+        private List<Card> GetNonBestSuitCards()
+        {
+            List<Card> cards = new List<Card>();
+
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                if (Hand[i].Suit != BestSuit)
+                {
+                    cards.Add(Hand[i]);
+                }
+            }
+
+            int[] sums = new int[4];
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i].Suit == Suit.Hjärter)
+                {
+                    sums[0] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Klöver)
+                {
+                    sums[1] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Ruter)
+                {
+                    sums[2] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Spader)
+                {
+                    sums[3] += cards[i].Value;
+                }
+            }
+
+            int maxIndex = sums.ToList().IndexOf(sums.Max());
+
+            Suit bestSuit;
+
+            if (maxIndex == 0)
+            {
+                bestSuit = Suit.Hjärter;
+            }
+            else if (maxIndex == 1)
+            {
+                bestSuit = Suit.Klöver;
+            }
+            else if (maxIndex == 2)
+            {
+                bestSuit = Suit.Ruter;
+            }
+            else if (maxIndex == 3)
+            {
+                bestSuit = Suit.Spader;
+            }
+            else
+            {
+                bestSuit = Suit.Hjärter;
+            }
+
+            List<Card> returnCards = new List<Card>();
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i].Suit == bestSuit)
+                {
+                    returnCards.Add(cards[i]);
+                }
+            }
+
+            return returnCards;
         }
 
         //Gets the probable collecting suit of the opponent

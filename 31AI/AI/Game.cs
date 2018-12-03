@@ -144,6 +144,7 @@ namespace _31AI.AI
 
         private int playARound(Player player, Player otherPlayer)
         {
+            player.UpCard = DiscardPile.Last();
             if (Printlevel > 1)
             {
                 printHand(player);
@@ -335,8 +336,10 @@ namespace _31AI.AI
                         printHand(playerNotInTurn);
 
 
-
+                    playerNotInTurn.OpponentLatestScore = Score(playerInTurn);
+                    playerInTurn.OpponentLatestScore = Score(playerNotInTurn);
                     playerInTurn.SpelSlut(true);
+
                     playerInTurn.TrettiettWins++;
                     playerInTurn.StoppedGames++;
                     playerInTurn.StoppedRounds += NbrOfRounds;
@@ -398,7 +401,8 @@ namespace _31AI.AI
                     if (Score(playerInTurn) > Score(playerNotInTurn))
 
                     {
-
+                        playerNotInTurn.OpponentLatestScore = Score(playerInTurn);
+                        playerInTurn.OpponentLatestScore = Score(playerNotInTurn);
                         playerInTurn.SpelSlut(true);
                         playerInTurn.KnackWins++;
                         playerInTurn.StoppedGames++;
@@ -424,7 +428,8 @@ namespace _31AI.AI
                     else
 
                     {
-
+                        playerNotInTurn.OpponentLatestScore = Score(playerInTurn);
+                        playerInTurn.OpponentLatestScore = Score(playerNotInTurn);
                         playerInTurn.SpelSlut(false);
 
                         playerNotInTurn.SpelSlut(true);
