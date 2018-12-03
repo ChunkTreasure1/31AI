@@ -155,7 +155,24 @@ namespace _31AI.AI
                 }
                 else
                 {
-                    
+                    List<Card> cards = GetNonBestSuitCards();
+
+                    if (card.Suit == cards[0].Suit)
+                    {
+                        int sumNonBest = 0;
+
+                        for (int i = 0; i < cards.Count; i++)
+                        {
+                            sumNonBest += cards[0].Value;
+                        }
+
+                        sumNonBest += card.Value;
+
+                        if (sumNonBest > Game.SuitScore(Hand, BestSuit))
+                        {
+                            return true;
+                        }
+                    }
                 }
             }
             return false;
@@ -200,6 +217,7 @@ namespace _31AI.AI
                         throwawayCard = Hand[i];
                     }
                 }
+
                 return throwawayCard;
             }
         }

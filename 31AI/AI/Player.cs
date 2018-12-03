@@ -55,6 +55,11 @@ namespace _31AI.AI
 
         public override bool TaUppKort(Card card)
         {
+            if (card == null)
+            {
+                return false;
+            }
+
             if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
             {
                 return true;
