@@ -617,6 +617,8 @@ namespace _31AI.AI
     class OtherAI : Player
     {
         List<int> OpponentKnockingScore = new List<int>();
+        List<Card> OpponentCards = new List<Card>();
+        Suit TempSuit;
 
         public OtherAI()
         {
@@ -625,32 +627,88 @@ namespace _31AI.AI
 
         public override bool Knacka(int round)
         {
-            if (Game.Score(this) >= 20)
+
+            //If the game round is less than 10
+            if (round < 10)
             {
-                return true;
+                if (Game.Score(this) >= 20 && UpCard.Value != 11 && UpCard.Suit != GetPropableOpponentCollectingSuit())
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                return false;
+                if (Game.Score(this) >= 25)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 
+        //Called when the player is supposed to draw a card
         public override bool TaUppKort(Card card)
         {
-            if (card.Suit == BestSuit)
+            //If the hand only is one suit
+            if (IsOneSuit())
             {
-                return true;
+                //If the card is of the best suit
+                if (card.Suit == BestSuit)
+                {
+                    //tme value
+                    int lowestValue = 12;
+
+                    //Go through the hand and find the lowest value
+                    for (int i = 0; i < Hand.Count; i++)
+                    {
+                        if (Hand[i].Value < lowestValue)
+                        {
+                            lowestValue = Hand[i].Value;
+                        }
+                    }
+
+                    //If the cards value is greater than the lowest value on the hand, return true
+                    if (card.Value > lowestValue)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                //If the card is not of the best suit
+                else
+                {
+                    return false;
+                }
             }
+            //Else if the hand is of different ones
             else
             {
-                return false;
+                //If the cards value is 11
+                if (card.Value == 11)
+                {
+                    return true;
+                }
             }
+            return false;
         }
 
+        //Called when the player is supposed to throw a card
         public override Card KastaKort()
         {
+            //Temp value
             Card throwaway = null;
 
+            //Go through the hand and find the card that isn't of the best suit
             for (int i = 0; i < Hand.Count; i++)
             {
                 if (Hand[i].Suit != BestSuit)
@@ -659,10 +717,13 @@ namespace _31AI.AI
                 }
             }
 
+            //If the above search ends up as null
             if (throwaway == null)
             {
+                //Temp value
                 int lowestValue = 12;
 
+                //Go through the hand again to find the card of the lowest value
                 for (int i = 0; i < Hand.Count; i++)
                 {
                     if (Hand[i].Value < lowestValue)
@@ -706,6 +767,66 @@ namespace _31AI.AI
             }
 
             return average;
+        }
+
+        //Check if the player has full hand of one suit
+        private bool IsOneSuit()
+        {
+            Game.Score(this);
+
+            int numCards = 0;
+
+            //Go through all the cards
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                //If the suit if the current card is the best suit
+                if (Hand[i].Suit == BestSuit)
+                {
+                    //Increase the temp num
+                    numCards++;
+                }
+            }
+
+            //If the amount of cards is equal to the amount of cards that is of the best suit
+            if (numCards == Hand.Count)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        //Gets the probable collecting suit of the opponent
+        Suit GetPropableOpponentCollectingSuit()
+        {
+            //int array to hold the amounts
+            int[] amounts = new int[4];
+
+            //Go through the list
+            for (int i = 0; i < OpponentCards.Count; i++)
+            {
+                //If the card is null, skip it
+                if (OpponentCards[i] != null)
+                {
+                    //Add the amount
+                    amounts[(int)OpponentCards[i].Suit] += OpponentCards[i].Value;
+                }
+            }
+
+            int maxValue = 0;
+
+            for (int i = 0; i < amounts.Length; i++)
+            {
+                if (amounts[i] > maxValue)
+                {
+                    maxValue = amounts[i];
+                    TempSuit = (Suit)i;
+                }
+            }
+
+            return TempSuit;
         }
     }
 }
