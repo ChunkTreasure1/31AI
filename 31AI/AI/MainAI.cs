@@ -10,6 +10,10 @@ namespace _31AI.AI
     {
         List<Card> OpponentCards = new List<Card>();
         List<int> OpponentKnockingScore = new List<int>();
+        List<int> KnockingScore = new List<int>();
+
+        int GameNumber = 0;
+        bool ShouldUseFirst = false;
 
         public MyPlayer()
         {
@@ -19,18 +23,83 @@ namespace _31AI.AI
         //Called when the enemy knocks
         public override bool Knacka(int round)
         {
-            int maxKnockScore = GetOpponentKnockingAverage();
-
-            //If the opponent didn't pick up a card from the pile
-            if (OpponentsLatestCard != null)
+            //If the round is less than or equal to 3
+            if (round <= 3)
             {
-                //Add the card to the opponentscards list
-                OpponentCards.Add(OpponentsLatestCard);
+                //If the game score is 25 or above
+                if (Game.Score(this) >= 20)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
-
-            if (Game.Score(this) >= maxKnockScore + 1)
+            //If the round is equal to 4
+            else if (round == 4)
             {
-                return true;
+                //If the game score is 26 or greater
+                if (Game.Score(this) >= 22)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            //If the round is 5
+            else if (round == 5)
+            {
+                //If the score is 27 or above
+                if (Game.Score(this) >= 24)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            //If the round is 6
+            else if (round == 6)
+            {
+                //If the score is 28 or above
+                if (Game.Score(this) >= 26)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            //If the round is 7
+            else if (round == 7)
+            {
+                //If the score is 29 or above
+                if (Game.Score(this) >= 28)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            //If the round is 8 or above
+            else if (round >= 8)
+            {
+                //If the score is 30 or above
+                if (Game.Score(this) >= 30)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -159,6 +228,8 @@ namespace _31AI.AI
         //Called every time a game has ended
         public override void SpelSlut(bool wonTheGame)
         {
+            GameNumber++;
+
             if (wonTheGame)
             {
                 Wongames++;
@@ -292,6 +363,20 @@ namespace _31AI.AI
             {
                 average = 20;
             }
+
+            return average;
+        }
+
+        private int GetKnockingAverage()
+        {
+            int sum = 0;
+
+            for (int i = 0; i < KnockingScore.Count; i++)
+            {
+                sum += KnockingScore[i];
+            }
+
+            int average = sum / KnockingScore.Count;
 
             return average;
         }
@@ -627,76 +712,73 @@ namespace _31AI.AI
 
         public override bool Knacka(int round)
         {
-
-            //If the game round is less than 10
-            if (round < 10)
+            if (Game.Score(this) >= 20)
             {
-                if (Game.Score(this) >= 20 && UpCard.Value != 11 && UpCard.Suit != GetPropableOpponentCollectingSuit())
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
             else
             {
-                if (Game.Score(this) >= 25)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
         //Called when the player is supposed to draw a card
         public override bool TaUppKort(Card card)
         {
-            //If the hand only is one suit
-            if (IsOneSuit())
+            if (card != null)
             {
-                //If the card is of the best suit
-                if (card.Suit == BestSuit)
+                int numberOfAces = 0;
+
+                for (int i = 0; i < Hand.Count; i++)
                 {
-                    //tme value
-                    int lowestValue = 12;
-
-                    //Go through the hand and find the lowest value
-                    for (int i = 0; i < Hand.Count; i++)
+                    if (Hand[i].Value == 11)
                     {
-                        if (Hand[i].Value < lowestValue)
-                        {
-                            lowestValue = Hand[i].Value;
-                        }
+                        numberOfAces++;
                     }
+                }
 
-                    //If the cards value is greater than the lowest value on the hand, return true
-                    if (card.Value > lowestValue)
+                if (card.Value == 11 && numberOfAces > 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    if (IsOneSuit())
                     {
-                        return true;
+                        if (GetWorstCardOfSuit(BestSuit).Value < card.Value)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     }
                     else
                     {
-                        return false;
+                        List<Card> cards = GetNonBestSuitCards();
+
+                        if (card.Suit == cards[0].Suit)
+                        {
+                            int sum = 0;
+
+                            for (int i = 0; i < cards.Count; i++)
+                            {
+                                sum += cards[i].Value;
+                            }
+
+                            sum += card.Value;
+
+                            if (sum > Game.Score(this))
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
                     }
-                }
-                //If the card is not of the best suit
-                else
-                {
-                    return false;
-                }
-            }
-            //Else if the hand is of different ones
-            else
-            {
-                //If the cards value is 11
-                if (card.Value == 11)
-                {
-                    return true;
                 }
             }
             return false;
@@ -705,35 +787,29 @@ namespace _31AI.AI
         //Called when the player is supposed to throw a card
         public override Card KastaKort()
         {
-            //Temp value
-            Card throwaway = null;
+            int numberOfAces = 0;
 
-            //Go through the hand and find the card that isn't of the best suit
             for (int i = 0; i < Hand.Count; i++)
             {
-                if (Hand[i].Suit != BestSuit)
+                if (Hand[i].Value == 11)
                 {
-                    throwaway = Hand[i];
+                    numberOfAces++;
                 }
             }
 
-            //If the above search ends up as null
-            if (throwaway == null)
+            int lowestValue = 12;
+            Card lowestCard = null;
+
+            for (int i = 0; i < Hand.Count; i++)
             {
-                //Temp value
-                int lowestValue = 12;
-
-                //Go through the hand again to find the card of the lowest value
-                for (int i = 0; i < Hand.Count; i++)
+                if (Hand[i].Value < lowestValue)
                 {
-                    if (Hand[i].Value < lowestValue)
-                    {
-                        lowestValue = Hand[i].Value;
-                        throwaway = Hand[i];
-                    }
+                    lowestValue = Hand[i].Value;
+                    lowestCard = Hand[i];
                 }
             }
-            return throwaway;
+
+            return null;
         }
 
         public override void SpelSlut(bool wonTheGame)
@@ -798,8 +874,80 @@ namespace _31AI.AI
             }
         }
 
+        private List<Card> GetNonBestSuitCards()
+        {
+            List<Card> cards = new List<Card>();
+
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                if (Hand[i].Suit != BestSuit)
+                {
+                    cards.Add(Hand[i]);
+                }
+            }
+
+            int[] sums = new int[4];
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i].Suit == Suit.Hjärter)
+                {
+                    sums[0] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Klöver)
+                {
+                    sums[1] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Ruter)
+                {
+                    sums[2] += cards[i].Value;
+                }
+                else if (cards[i].Suit == Suit.Spader)
+                {
+                    sums[3] += cards[i].Value;
+                }
+            }
+
+            int maxIndex = sums.ToList().IndexOf(sums.Max());
+
+            Suit bestSuit;
+
+            if (maxIndex == 0)
+            {
+                bestSuit = Suit.Hjärter;
+            }
+            else if (maxIndex == 1)
+            {
+                bestSuit = Suit.Klöver;
+            }
+            else if (maxIndex == 2)
+            {
+                bestSuit = Suit.Ruter;
+            }
+            else if (maxIndex == 3)
+            {
+                bestSuit = Suit.Spader;
+            }
+            else
+            {
+                bestSuit = Suit.Hjärter;
+            }
+
+            List<Card> returnCards = new List<Card>();
+
+            for (int i = 0; i < cards.Count; i++)
+            {
+                if (cards[i].Suit == bestSuit)
+                {
+                    returnCards.Add(cards[i]);
+                }
+            }
+
+            return returnCards;
+        }
+
         //Gets the probable collecting suit of the opponent
-        Suit GetPropableOpponentCollectingSuit()
+        private Suit GetPropableOpponentCollectingSuit()
         {
             //int array to hold the amounts
             int[] amounts = new int[4];
@@ -828,5 +976,139 @@ namespace _31AI.AI
 
             return TempSuit;
         }
+
+        private int GetAmountOfCardsOfBestSuit()
+        {
+            int cardsOfBestSuit = 0;
+
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                if (Hand[i].Suit == BestSuit)
+                {
+                    cardsOfBestSuit++;
+                }
+            }
+
+            return cardsOfBestSuit++;
+        }
+
+        private Card GetWorstCardOfSuit(Suit suit)
+        {
+            int lowestValue = 12;
+            Card lowestCard = null;
+
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                if (Hand[i].Suit == suit && Hand[i].Value < lowestValue)
+                {
+                    lowestValue = Hand[i].Value;
+                    lowestCard = Hand[i];
+                }
+            }
+
+            return lowestCard;
+        }
+
+    }
+
+    class WORST_AI_IN_HUMAN_HISTORY : Player
+    {
+
+        public WORST_AI_IN_HUMAN_HISTORY()
+        {
+            Name = "Worst AI in human history";
+        }
+
+        public override bool Knacka(int round)
+        {
+            if (round == 2)
+            {
+                if (Game.Score(this) >= 18)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            if (round == 3)
+            {
+                if (Game.Score(this) >= 20)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            if (round >= 4)
+            {
+                if (Game.Score(this) >= 22)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+
+            return false;
+        }
+
+        public override bool TaUppKort(Card card)
+        {
+            if (card == null) return false;
+
+            if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+
+        }
+
+        public override Card KastaKort()
+        {
+            Card throwaway = null;
+
+            for (int i = 0; i < Hand.Count; i++)
+            {
+                if (Hand[i].Suit != BestSuit)
+                {
+                    throwaway = Hand[i];
+                }
+            }
+            if (throwaway == null)
+            {
+                Game.Score(this);
+                Card worstcard = Hand.First();
+                for (int i = 1; i < Hand.Count; i++)
+                {
+                    if (Hand[i].Value < worstcard.Value)
+                    {
+                        return worstcard;
+                    }
+                }
+            }
+            return throwaway;
+        }
+
+        public override void SpelSlut(bool wonTheGame)
+        {
+            if (wonTheGame)
+            {
+                Wongames++;
+            }
+
+        }
     }
 }
+
