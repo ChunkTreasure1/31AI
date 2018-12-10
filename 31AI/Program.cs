@@ -26,6 +26,7 @@ namespace _31AI
             players.Add(new TestAI());
             players.Add(new OtherAI());
             players.Add(new WORST_AI_IN_HUMAN_HISTORY());
+            players.Add(new FabianPlayer());
 
             Console.WriteLine("Vilka två spelare skall mötas?");
             for (int i = 1; i <= players.Count; i++)
