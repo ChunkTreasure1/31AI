@@ -20,7 +20,6 @@ namespace _31AI
 
             List<Player> players = new List<Player>();
 
-
             players.Add(new BasicPlayer());
             players.Add(new MyPlayer());
             players.Add(new TestAI());
@@ -35,25 +34,33 @@ namespace _31AI
             }
             int p1 = int.Parse(Console.ReadLine());
             int p2 = int.Parse(Console.ReadLine());
+
             Player player1 = players[p1 - 1];
             Player player2 = players[p2 - 1];
+
             player1.Game = game;
             player1.PrintPosition = 0;
             player2.Game = game;
             player2.PrintPosition = 9;
+
             game.Player1 = player1;
             game.Player2 = player2;
+
             Console.WriteLine("Hur många spel skall spelas?");
             int numberOfGames = int.Parse(Console.ReadLine());
+
             Console.WriteLine("Skriva ut första spelet? (y/n)");
             string print = Console.ReadLine();
+
             Console.Clear();
             if (print == "y")
                 game.Printlevel = 2;
             else
                 game.Printlevel = 0;
+
             game.initialize(true);
             game.PlayAGame(true);
+
             Console.Clear();
             bool player1starts = true;
 

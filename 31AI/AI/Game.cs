@@ -73,7 +73,6 @@ namespace _31AI.AI
 
     class Game
     {
-
         List<Card> CardDeck = new List<Card>();
         List<Card> DiscardPile = new List<Card>();
         public bool Lastround;
@@ -84,11 +83,6 @@ namespace _31AI.AI
         public Player Player2 { private get; set; }
         Random RNG = new Random();
         public int NbrOfRounds;
-
-        public Game()
-        {
-
-        }
 
         public void initialize(bool firstGame)
         {
@@ -265,6 +259,7 @@ namespace _31AI.AI
         {
             int[] suitScore = new int[4];
             int aces = 0;
+
             for (int i = 0; i < hand.Count; i++)
             {
                 if (hand[i] != null && hand[i] != excluded)
@@ -275,10 +270,12 @@ namespace _31AI.AI
                         aces++;
                     }
                 }
-
             }
+
             if (aces == 3)
+            {
                 return 31;
+            }
             int max = 0;
 
             for (int i = 0; i < 4; i++)
@@ -292,7 +289,6 @@ namespace _31AI.AI
         }
 
         public void PlayAGame(bool player1starts)
-
         {
 
             NbrOfRounds = 0;
@@ -300,41 +296,29 @@ namespace _31AI.AI
             Player playerInTurn, playerNotInTurn, temp;
 
             if (player1starts)
-
             {
-
                 playerInTurn = Player1;
-
                 playerNotInTurn = Player2;
-
             }
 
             else
-
             {
-
                 playerInTurn = Player2;
-
                 playerNotInTurn = Player1;
-
             }
 
             while (Cardnumber < 51 && NbrOfRounds < 100)
-
             {
 
                 NbrOfRounds++;
-
                 int result = playARound(playerInTurn, playerNotInTurn);
 
                 if (result == 31)
-
                 {
-
                     if (Printlevel > 1)
-
+                    {
                         printHand(playerNotInTurn);
-
+                    }
 
                     playerNotInTurn.OpponentLatestScore = Score(playerInTurn);
                     playerInTurn.OpponentLatestScore = Score(playerNotInTurn);
@@ -346,23 +330,17 @@ namespace _31AI.AI
                     playerNotInTurn.SpelSlut(false);
 
                     if (Printlevel > 0)
-
                     {
-
                         Console.SetCursorPosition(15, playerInTurn.PrintPosition + 5);
-
                         Console.Write(playerInTurn.Name + " fick 31 och vann spelet!");
 
                         Console.ReadLine();
-
                     }
 
                     break;
 
                 }
-
                 else if (result > 0)
-
                 {
                     playerInTurn.KnackTotal += result;
                     Lastround = true;
@@ -371,35 +349,20 @@ namespace _31AI.AI
                     playARound(playerNotInTurn, playerInTurn);
 
                     if (Printlevel > 1)
-
                     {
-
                         printHand(playerInTurn);
-
-                        printHand(playerNotInTurn);
-
+                        printHand(playerNotInTurn);                
                     }
-
-
-
-
-
                     if (Printlevel > 0)
-
                     {
-
                         Console.SetCursorPosition(15, playerInTurn.PrintPosition + 5);
-
                         Console.Write(playerInTurn.Name + " knackade och har " + Score(playerInTurn) + " poäng");
 
                         Console.SetCursorPosition(15, playerNotInTurn.PrintPosition + 5);
-
                         Console.Write(playerNotInTurn.Name + " har " + Score(playerNotInTurn) + " poäng");
-
                     }
 
                     if (Score(playerInTurn) > Score(playerNotInTurn))
-
                     {
                         playerNotInTurn.OpponentLatestScore = Score(playerInTurn);
                         playerInTurn.OpponentLatestScore = Score(playerNotInTurn);
@@ -410,23 +373,16 @@ namespace _31AI.AI
                         playerNotInTurn.SpelSlut(false);
 
                         if (Printlevel > 0)
-
                         {
-
                             Console.SetCursorPosition(15, playerInTurn.PrintPosition + 6);
-
                             Console.WriteLine(playerInTurn.Name + " vann!");
 
                             Console.ReadLine();
-
                         }
-
                         break;
-
                     }
 
                     else
-
                     {
                         playerNotInTurn.OpponentLatestScore = Score(playerInTurn);
                         playerInTurn.OpponentLatestScore = Score(playerNotInTurn);
@@ -439,65 +395,41 @@ namespace _31AI.AI
                         //playerNotInTurn.WinRounds += NbrOfRounds;
 
                         if (Printlevel > 0)
-
                         {
-
                             Console.SetCursorPosition(15, playerNotInTurn.PrintPosition + 6);
-
                             Console.WriteLine(playerNotInTurn.Name + " vann!");
 
                             Console.ReadLine();
-
                         }
 
                         break;
-
                     }
-
                 }
-
                 else
-
                 {
-
                     temp = playerNotInTurn;
 
+                    //
                     playerNotInTurn = playerInTurn;
-
                     playerInTurn = temp;
 
                 }
-
-
-
             }
 
             if (Cardnumber >= 51 || NbrOfRounds >= 100)
-
             {
-
                 if (Printlevel > 0)
-
                 {
-
                     Console.SetCursorPosition(0, 20);
 
                     Console.WriteLine("Korten tog slut utan att någon spelare vann.");
 
                     Console.ReadLine();
-
                 }
 
                 playerInTurn.SpelSlut(false);
-
                 playerNotInTurn.SpelSlut(false);
-
-
-
             }
-
-
-
         }
 
         private void Discard(Card card)
@@ -521,23 +453,18 @@ namespace _31AI.AI
             return card;
         }
 
-
-
         private void Shuffle()
         {
             for (int i = 0; i < 200; i++)
             {
-                switchCards();
-            }
-        }
+                int card1 = RNG.Next(CardDeck.Count);
+                int card2 = RNG.Next(CardDeck.Count);
 
-        private void switchCards()
-        {
-            int card1 = RNG.Next(CardDeck.Count);
-            int card2 = RNG.Next(CardDeck.Count);
-            Card temp = CardDeck[card1];
-            CardDeck[card1] = CardDeck[card2];
-            CardDeck[card2] = temp;
+                Card temp = CardDeck[card1];
+
+                CardDeck[card1] = CardDeck[card2];
+                CardDeck[card2] = temp;
+            }
         }
     }
 }

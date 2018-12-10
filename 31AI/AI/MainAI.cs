@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace _31AI.AI
 {
@@ -11,9 +12,7 @@ namespace _31AI.AI
         List<Card> OpponentCards = new List<Card>();
         List<int> OpponentKnockingScore = new List<int>();
         List<int> KnockingScore = new List<int>();
-
-        int GameNumber = 0;
-        bool ShouldUseFirst = false;
+        bool knocked = false;
 
         public MyPlayer()
         {
@@ -23,12 +22,14 @@ namespace _31AI.AI
         //Called when the enemy knocks
         public override bool Knacka(int round)
         {
-            if (Game.Score(this) >= 23)
+            if (Game.Score(this) >= GetOpponentKnockingAverage() - 3)
             {
+                knocked = true;
                 return true;
             }
             else
             {
+                knocked = false;
                 return false;
             }
         }
@@ -36,6 +37,14 @@ namespace _31AI.AI
         //Called when the AI takes up a card
         public override bool TaUppKort(Card card)
         {
+            if (lastTurn)
+            {
+                if (card.Suit == BestSuit)
+                {
+                    return true;
+                }
+            }
+
             //If the card isn't null
             if (card != null)
             {
@@ -105,11 +114,12 @@ namespace _31AI.AI
         //Called when the AI should throw a cards
         public override Card KastaKort()
         {
+
             //If all the cards in the hand is the same suit
             if (IsOneSuit())
             {
                 Card lowestCard = null;
-                int lowestCardValue = 11;
+                int lowestCardValue = 12;
 
                 //Go through the hand
                 for (int i = 0; i < Hand.Count; i++)
@@ -131,7 +141,6 @@ namespace _31AI.AI
                 //Temp values
                 Card throwawayCard = null;
                 int lowestCardValue = 12;
-
                 //Go through the hand
                 for (int i = 0; i < Hand.Count; i++)
                 {
@@ -143,10 +152,6 @@ namespace _31AI.AI
                     }
                 }
 
-                if (throwawayCard == null)
-                {
-                    Console.Write("t");
-                }
                 return throwawayCard;
             }
         }
@@ -154,11 +159,15 @@ namespace _31AI.AI
         //Called every time a game has ended
         public override void SpelSlut(bool wonTheGame)
         {
-            GameNumber++;
 
             if (wonTheGame)
             {
                 Wongames++;
+
+                if (knocked)
+                {
+                    KnockingScore.Add(Game.Score(this));
+                }
             }
 
             if (lastTurn)
@@ -168,6 +177,7 @@ namespace _31AI.AI
 
             //Clear the collecting cache
             OpponentCards.Clear();
+            knocked = false;
         }
 
         //Check if the player has full hand of one suit
@@ -1081,9 +1091,11 @@ namespace _31AI.AI
         }
     }
 
-    class FabianPlayer : Player //Denna spelare fungerar exakt som MyPlayer. Ändra gärna i denna för att göra tester.
+    class FabianPlayer : Player
     {
-        private Card[] KnownOpponentCards = new Card[3];
+        private List<int> OpponentKnackValues = new List<int>();
+        private bool OpponentHasKnackat = false;
+        private int OpponentKnackatGånger = 0;
         public FabianPlayer()
         {
             Name = "FabianPlayer";
@@ -1091,8 +1103,23 @@ namespace _31AI.AI
 
         public override bool Knacka(int round)
         {
-
-            if (Game.Score(this) >= 24)
+            int whenToKnacka = 24;
+            if (/*CalculateOpponentKnackValue() >= whenToKnacka &&*/ OpponentKnackatGånger >= 100)
+            {
+                if (CalculateOpponentKnackValue() >= 29)
+                {
+                    whenToKnacka = 28;
+                }
+                else if (CalculateOpponentKnackValue() <= 15)
+                {
+                    whenToKnacka = 16;
+                }
+                else
+                {
+                    whenToKnacka = (CalculateOpponentKnackValue() - 3);
+                }
+            }
+            if (Game.Score(this) >= whenToKnacka)
             {
                 return true;
             }
@@ -1112,6 +1139,15 @@ namespace _31AI.AI
 
         public override bool TaUppKort(Card card)
         {
+            if (lastTurn)
+            {
+                OpponentHasKnackat = true;
+            }
+            else
+            {
+                OpponentHasKnackat = false;
+            }
+            Hand.Add(card);
             int lowestCardInHandValue = 12;
             for (int i = 0; i < Hand.Count; i++)
             {
@@ -1122,10 +1158,12 @@ namespace _31AI.AI
             }
             if (card.Value == 11 || (card.Value == 10 && card.Suit == BestSuit) || (card.Value >= lowestCardInHandValue && card.Suit == BestSuit))
             {
+                Hand.RemoveAt(Hand.Count - 1);
                 return true;
             }
             else
             {
+                Hand.RemoveAt(Hand.Count - 1);
                 return false;
             }
 
@@ -1181,13 +1219,15 @@ namespace _31AI.AI
                 {
                     worstCard = Hand[i];
                 }
-                else if (numberOfAce == 2)
-                {
-                    if (Hand[i].Value != 11 && Hand[i].Value < worstCard.Value)
-                    {
-                        worstCard = Hand[i];
-                    }
-                }
+                // Om motstånndaren plockar upp ett kort från skräphögen är det kortet den andra spelarens bestsuit
+                // kolla om ess har blivit kastad/ , testa igen
+                //else if (numberOfAce == 2)
+                //{
+                //   if (Hand[i].Value != 11 && Hand[i].Value < worstCard.Value)
+                //   {
+                //        worstCard = Hand[i];
+                //    }
+                //}
                 else if (Hand[i].Value < worstCard.Value && Hand[i].Suit != BestSuit && Hand[i].Value != 11)
                 {
                     worstCard = Hand[i];
@@ -1199,15 +1239,32 @@ namespace _31AI.AI
 
         public override void SpelSlut(bool wonTheGame)
         {
+            //Debug.WriteLine("OpponentKnackatGånger: " + OpponentKnackatGånger);
+            //Debug.WriteLine("Average KnackPoäng: " + CalculateOpponentKnackValue());
+            if (OpponentHasKnackat)
+            {
+                OpponentKnackValues.Add(OpponentLatestScore);
+                OpponentKnackatGånger++;
+            }
             if (wonTheGame)
             {
                 Wongames++;
             }
 
         }
-        private void RegisterOpponentCards()
+        private int CalculateOpponentKnackValue()
         {
-            //KnownOpponentCards.Add(card)
+            double tempSum = OpponentKnackValues.Sum();
+            int opponentKnackValueReal = 0;
+            if (OpponentKnackValues.Count == 0)
+            {
+
+            }
+            else
+            {
+                opponentKnackValueReal = Convert.ToInt32(Math.Round(tempSum /= OpponentKnackValues.Count));
+            }
+            return opponentKnackValueReal;
         }
     }
 
