@@ -10,26 +10,64 @@ namespace _31AI.AI
     class MyPlayer : Player
     {
         List<Card> OpponentCards = new List<Card>();
+        List<Card> VirtualDeck = new List<Card>();
+        List<Card> CardsInPile = new List<Card>();
+
         List<int> OpponentKnockingScore = new List<int>();
         List<int> KnockingScore = new List<int>();
-        bool knocked = false;
+
+        private bool Knocked = false;
 
         public MyPlayer()
         {
             Name = "HackerMan";
         }
 
-        //Called when the enemy knocks
-        public override bool Knacka(int round)
+        private void SetupDeck()
         {
-            if (Game.Score(this) >= GetOpponentKnockingAverage() - 3)
+            VirtualDeck.Clear();
+
+            int id = 0;
+            int suit = 0;
+
+            for (int i = 0; i < 52; i++)
             {
-                knocked = true;
+                id = i % 13 + 1;
+                suit = i % 4;
+                VirtualDeck.Add(new Card(id, (Suit)suit));
+            }
+        }
+
+        //Compares two cards, mostly used with the virtual deck
+        private bool CompareCards(Card cardOne, Card cardTwo)
+        {
+            //Check if the card is the same and return the right value
+            if (cardOne.Suit == cardTwo.Suit && cardOne.Value == cardTwo.Value)
+            {
                 return true;
             }
             else
             {
-                knocked = false;
+                return false;
+            }
+        }
+
+        //Called when the enemy knocks
+        public override bool Knacka(int round)
+        {
+            if (round <= 2)
+            {
+                SetupDeck();
+            }
+
+            if (Game.Score(this) >= GetOpponentKnockingAverage() - 3)
+            {
+                Knocked = true;
+                return true;
+            }
+            else
+            {
+                Knocked = false;
                 return false;
             }
         }
@@ -41,70 +79,89 @@ namespace _31AI.AI
             {
                 if (card.Suit == BestSuit)
                 {
+                    for (int i = 0; i < CardsInPile.Count; i++)
+                    {
+                        if (CompareCards(CardsInPile[i], card))
+                        {
+                            CardsInPile.RemoveAt(i);
+                        }
+                    }
                     return true;
                 }
             }
-
-            //If the card isn't null
-            if (card != null)
+            //Check if the hand is one suit
+            if (IsOneSuit())
             {
-                //Check if the hand is one suit
-                if (IsOneSuit())
+                //If the cards suit is the best suit
+                if (card.Suit == BestSuit)
                 {
-                    //If the cards suit is the best suit
-                    if (card.Suit == BestSuit)
-                    {
-                        //Temp value
-                        int lowestValue = 11;
+                    //Temp value
+                    int lowestValue = 11;
 
-                        //Go through the hand
-                        for (int i = 0; i < Hand.Count; i++)
+                    //Go through the hand
+                    for (int i = 0; i < Hand.Count; i++)
+                    {
+                        //If the hands lowest card is lower than the lowestValue
+                        if (Hand[i].Value < lowestValue)
                         {
-                            //If the hands lowest card is lower than the lowestValue
-                            if (Hand[i].Value < lowestValue)
+                            //Change the lowestValue
+                            lowestValue = Hand[i].Value;
+                        }
+                    }
+
+                    //If the value is less than the lowest value
+                    if (card.Value > lowestValue)
+                    {
+                        //Go trough the virtual deck and find the same card as the real one
+                        //The add that to the cards in the pile and remove it from the virtual deck
+                        for (int i = 0; i < CardsInPile.Count; i++)
+                        {
+                            if (CompareCards(CardsInPile[i], card))
                             {
-                                //Change the lowestValue
-                                lowestValue = Hand[i].Value;
+                                CardsInPile.RemoveAt(i);
                             }
                         }
-
-                        //If the value is less than the lowest value
-                        if (card.Value > lowestValue)
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return false;
-                        }
+                        return true;
                     }
                     else
                     {
-                        if (card.Value == 11)
-                        {
-                            return true;
-                        }
+                        return false;
                     }
                 }
                 else
                 {
-                    List<Card> cards = GetNonBestSuitCards();
-
-                    if (card.Suit == cards[0].Suit)
+                    //FIX HERE
+                    if (card.Value == 11)
                     {
-                        int sumNonBest = 0;
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                List<Card> cards = GetNonBestSuitCards();
 
-                        for (int i = 0; i < cards.Count; i++)
+                if (card.Suit == cards[0].Suit)
+                {
+                    int sumNonBest = 0;
+
+                    for (int i = 0; i < cards.Count; i++)
+                    {
+                        sumNonBest += cards[i].Value;
+                    }
+
+                    sumNonBest += card.Value;
+
+                    if (sumNonBest > Game.SuitScore(Hand, BestSuit))
+                    {
+                        for (int i = 0; i < CardsInPile.Count; i++)
                         {
-                            sumNonBest += cards[0].Value;
+                            if (CompareCards(CardsInPile[i], card))
+                            {
+                                CardsInPile.RemoveAt(i);
+                            }
                         }
-
-                        sumNonBest += card.Value;
-
-                        if (sumNonBest > Game.SuitScore(Hand, BestSuit))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -114,7 +171,6 @@ namespace _31AI.AI
         //Called when the AI should throw a cards
         public override Card KastaKort()
         {
-
             //If all the cards in the hand is the same suit
             if (IsOneSuit())
             {
@@ -132,6 +188,7 @@ namespace _31AI.AI
                         lowestCardValue = Hand[i].Value;
                     }
                 }
+                CardsInPile.Add(lowestCard);
 
                 //Return the worst card
                 return lowestCard;
@@ -152,6 +209,8 @@ namespace _31AI.AI
                     }
                 }
 
+                CardsInPile.Add(throwawayCard);
+
                 return throwawayCard;
             }
         }
@@ -164,7 +223,7 @@ namespace _31AI.AI
             {
                 Wongames++;
 
-                if (knocked)
+                if (Knocked)
                 {
                     KnockingScore.Add(Game.Score(this));
                 }
@@ -177,7 +236,7 @@ namespace _31AI.AI
 
             //Clear the collecting cache
             OpponentCards.Clear();
-            knocked = false;
+            Knocked = false;
         }
 
         //Check if the player has full hand of one suit
@@ -293,7 +352,7 @@ namespace _31AI.AI
             {
                 average = sum / OpponentKnockingScore.Count;
 
-                
+
             }
             else
             {
@@ -303,6 +362,7 @@ namespace _31AI.AI
             return average;
         }
 
+        //Get the knocking average of the player
         private int GetKnockingAverage()
         {
             int sum = 0;
@@ -318,7 +378,7 @@ namespace _31AI.AI
         }
 
         //Gets the probable collecting suit of the opponent
-        Suit GetPropableOpponentCollectingSuit()
+        private Suit GetPropableOpponentCollectingSuit()
         {
             //int array to hold the amounts
             int[] amounts = new int[4];
@@ -368,7 +428,12 @@ namespace _31AI.AI
             else
             {
                 return Suit.Hjärter;
-            }   
+            }
+        }
+
+        private void GetChance()
+        {
+
         }
     }
 
