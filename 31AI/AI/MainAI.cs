@@ -55,9 +55,9 @@ namespace _31AI.AI
         //Called when the enemy knocks
         public override bool Knacka(int round)
         {
-            if (round <= 2)
+            if ((round == 2 || round == 3) && Game.Score(this) > 16 && UpCard.Value < 10)
             {
-                SetupDeck();
+                return true;
             }
 
             if (Game.Score(this) >= GetOpponentKnockingAverage() - 3)
@@ -79,13 +79,6 @@ namespace _31AI.AI
             {
                 if (card.Suit == BestSuit)
                 {
-                    for (int i = 0; i < CardsInPile.Count; i++)
-                    {
-                        if (CompareCards(CardsInPile[i], card))
-                        {
-                            CardsInPile.RemoveAt(i);
-                        }
-                    }
                     return true;
                 }
             }
@@ -112,15 +105,6 @@ namespace _31AI.AI
                     //If the value is less than the lowest value
                     if (card.Value > lowestValue)
                     {
-                        //Go trough the virtual deck and find the same card as the real one
-                        //The add that to the cards in the pile and remove it from the virtual deck
-                        for (int i = 0; i < CardsInPile.Count; i++)
-                        {
-                            if (CompareCards(CardsInPile[i], card))
-                            {
-                                CardsInPile.RemoveAt(i);
-                            }
-                        }
                         return true;
                     }
                     else
@@ -154,13 +138,6 @@ namespace _31AI.AI
 
                     if (sumNonBest > Game.SuitScore(Hand, BestSuit))
                     {
-                        for (int i = 0; i < CardsInPile.Count; i++)
-                        {
-                            if (CompareCards(CardsInPile[i], card))
-                            {
-                                CardsInPile.RemoveAt(i);
-                            }
-                        }
                         return true;
                     }
                 }
@@ -188,7 +165,6 @@ namespace _31AI.AI
                         lowestCardValue = Hand[i].Value;
                     }
                 }
-                CardsInPile.Add(lowestCard);
 
                 //Return the worst card
                 return lowestCard;
@@ -209,8 +185,6 @@ namespace _31AI.AI
                     }
                 }
 
-                CardsInPile.Add(throwawayCard);
-
                 return throwawayCard;
             }
         }
@@ -218,7 +192,6 @@ namespace _31AI.AI
         //Called every time a game has ended
         public override void SpelSlut(bool wonTheGame)
         {
-
             if (wonTheGame)
             {
                 Wongames++;
@@ -345,21 +318,19 @@ namespace _31AI.AI
         private int GetOpponentKnockingAverage()
         {
             //Get the sum and the average
-            int sum = OpponentKnockingScore.Sum();
-            int average = 0;
+            double sum = OpponentKnockingScore.Sum();
+            double average = 0;
 
             if (OpponentKnockingScore.Count != 0)
             {
-                average = sum / OpponentKnockingScore.Count;
-
-
+                average = Math.Round(sum / OpponentKnockingScore.Count);
             }
             else
             {
-                average = 20;
+                average = 18;
             }
 
-            return average;
+            return (int)average;
         }
 
         //Get the knocking average of the player
@@ -429,11 +400,6 @@ namespace _31AI.AI
             {
                 return Suit.Hjärter;
             }
-        }
-
-        private void GetChance()
-        {
-
         }
     }
 
