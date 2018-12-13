@@ -7,67 +7,37 @@ using System.Diagnostics;
 
 namespace _31AI.AI
 {
-    class MyPlayer : Player
+    /* 
+         
+    */
+
+    class HackerMan : Player
     {
-        List<Card> OpponentCards = new List<Card>();
-        List<Card> VirtualDeck = new List<Card>();
-        List<Card> CardsInPile = new List<Card>();
-
         List<int> OpponentKnockingScore = new List<int>();
-        List<int> KnockingScore = new List<int>();
-
-        private bool Knocked = false;
-
-        public MyPlayer()
+        public HackerMan()
         {
             Name = "HackerMan";
-        }
-
-        private void SetupDeck()
-        {
-            VirtualDeck.Clear();
-
-            int id = 0;
-            int suit = 0;
-
-            for (int i = 0; i < 52; i++)
-            {
-                id = i % 13 + 1;
-                suit = i % 4;
-                VirtualDeck.Add(new Card(id, (Suit)suit));
-            }
-        }
-
-        //Compares two cards, mostly used with the virtual deck
-        private bool CompareCards(Card cardOne, Card cardTwo)
-        {
-            //Check if the card is the same and return the right value
-            if (cardOne.Suit == cardTwo.Suit && cardOne.Value == cardTwo.Value)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
 
         //Called when the enemy knocks
         public override bool Knacka(int round)
         {
-            if ((round == 2 || round == 3) && Game.Score(this) > 16 && UpCard.Value < 10)
+
+            //If it's round 2 or 3 and the players score is greater than 16 and the top card on the piles value is less than 10
+            if ((round == 2 || round == 3) && Game.Score(this) > 17 && UpCard.Value < 10)
             {
                 return true;
             }
 
-            if (Game.Score(this) >= GetOpponentKnockingAverage() - 3)
+            int i = GetOpponentKnockingAverage();
+            int j = Game.Score(this);
+            //If the game score is more than the opponents knocking average - 1
+            if (Game.Score(this) >= GetOpponentKnockingAverage() - 1)
             {
-                Knocked = true;
                 return true;
             }
             else
             {
-                Knocked = false;
                 return false;
             }
         }
@@ -151,6 +121,7 @@ namespace _31AI.AI
             //If all the cards in the hand is the same suit
             if (IsOneSuit())
             {
+                //Temp values
                 Card lowestCard = null;
                 int lowestCardValue = 12;
 
@@ -192,31 +163,34 @@ namespace _31AI.AI
         //Called every time a game has ended
         public override void SpelSlut(bool wonTheGame)
         {
+            //Check if the player won the game
             if (wonTheGame)
             {
+                /*
+                 * This adds one to the amount of won games by this player.
+                 * This is really not safe because it is prone to be used to cheat.
+                 * It should instead be located in the game class and if the player would need access to it.
+                 * It should be restricted to only be getable not setable.
+                 * Fix untill next year.
+                 */
                 Wongames++;
-
-                if (Knocked)
-                {
-                    KnockingScore.Add(Game.Score(this));
-                }
             }
 
+            //If the opponent has knocked 
             if (lastTurn)
             {
+                //Add the opponents score to the list
                 OpponentKnockingScore.Add(OpponentLatestScore);
             }
-
-            //Clear the collecting cache
-            OpponentCards.Clear();
-            Knocked = false;
         }
 
         //Check if the player has full hand of one suit
         private bool IsOneSuit()
         {
+            //Update the score of the player
             Game.Score(this);
 
+            //Temp value
             int numCards = 0;
 
             //Go through all the cards
@@ -244,18 +218,24 @@ namespace _31AI.AI
         //Get a list of the cards of the suit that isn't best
         private List<Card> GetNonBestSuitCards()
         {
+            //Create temp list to later return
             List<Card> cards = new List<Card>();
 
+            //Go through the players hand
             for (int i = 0; i < Hand.Count; i++)
             {
+                //If the card is not of the best suit
                 if (Hand[i].Suit != BestSuit)
                 {
+                    //Add the card to the list
                     cards.Add(Hand[i]);
                 }
             }
 
+            //Int array to hold the sums of the cards
             int[] sums = new int[4];
 
+            //Go through the cards list
             for (int i = 0; i < cards.Count; i++)
             {
                 if (cards[i].Suit == Suit.Hjärter)
@@ -321,85 +301,16 @@ namespace _31AI.AI
             double sum = OpponentKnockingScore.Sum();
             double average = 0;
 
-            if (OpponentKnockingScore.Count != 0)
+            if (OpponentKnockingScore.Count > 2)
             {
                 average = Math.Round(sum / OpponentKnockingScore.Count);
             }
             else
             {
-                average = 18;
+                average = 15;
             }
 
             return (int)average;
-        }
-
-        //Get the knocking average of the player
-        private int GetKnockingAverage()
-        {
-            int sum = 0;
-
-            for (int i = 0; i < KnockingScore.Count; i++)
-            {
-                sum += KnockingScore[i];
-            }
-
-            int average = sum / KnockingScore.Count;
-
-            return average;
-        }
-
-        //Gets the probable collecting suit of the opponent
-        private Suit GetPropableOpponentCollectingSuit()
-        {
-            //int array to hold the amounts
-            int[] amounts = new int[4];
-
-            //Go through all the cards that the opponent has taken from the throwaway pile
-            for (int i = 0; i < OpponentCards.Count; i++)
-            {
-                //Add to the correct amount
-                if (OpponentCards[i].Suit == Suit.Hjärter)
-                {
-                    amounts[0]++;
-                }
-                else if (OpponentCards[i].Suit == Suit.Klöver)
-                {
-                    amounts[1]++;
-                }
-                else if (OpponentCards[i].Suit == Suit.Ruter)
-                {
-                    amounts[2]++;
-                }
-                else if (OpponentCards[i].Suit == Suit.Spader)
-                {
-                    amounts[3]++;
-                }
-            }
-
-            //Get the index of the highest occuring number
-            int maxIndex = amounts.ToList().IndexOf(amounts.Max());
-
-            //Return the right suit based on the number
-            if (maxIndex == 0)
-            {
-                return Suit.Hjärter;
-            }
-            else if (maxIndex == 1)
-            {
-                return Suit.Klöver;
-            }
-            else if (maxIndex == 2)
-            {
-                return Suit.Ruter;
-            }
-            else if (maxIndex == 3)
-            {
-                return Suit.Spader;
-            }
-            else
-            {
-                return Suit.Hjärter;
-            }
         }
     }
 
@@ -665,7 +576,6 @@ namespace _31AI.AI
             return Suit.Hjärter;
         }
     }
-
     class OtherAI : Player
     {
         List<int> OpponentKnockingScore = new List<int>();
@@ -1121,7 +1031,6 @@ namespace _31AI.AI
 
         }
     }
-
     class FabianPlayer : Player
     {
         private List<int> OpponentKnackValues = new List<int>();
@@ -1147,7 +1056,7 @@ namespace _31AI.AI
                 }
                 else
                 {
-                    whenToKnacka = (CalculateOpponentKnackValue() - 3);
+                    whenToKnacka = (CalculateOpponentKnackValue() - 1);
                 }
             }
             if (Game.Score(this) >= whenToKnacka)
